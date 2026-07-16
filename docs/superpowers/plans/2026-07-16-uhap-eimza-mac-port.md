@@ -74,8 +74,10 @@ uhap-eimza-mac/
 build/
 .jre-cache/
 *.dmg
+*.msi
 .DS_Store
 _tmp/
+.superpowers/
 ```
 
 - [ ] **Step 2: Pristine payload'u kopyala**
