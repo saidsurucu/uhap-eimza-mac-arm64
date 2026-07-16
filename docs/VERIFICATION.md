@@ -44,8 +44,8 @@ ESYA / ma3api) kullandığı **birebir düşük-seviye `sun.security.pkcs11.wrap
 API'si** ile:
 - Okuyucu: `ACS ACR39U ICC` — 1 token'lı slot.
 - `C_Login(CKU_USER, PIN)` → **LOGIN OK** (kimlik doğrulamalı erişim çalışıyor).
-- Kartta 1 özel anahtar + gerçek nitelikli sertifika bulundu:
-  `CN=(kimlik gizlendi)`.
+- Kartta 1 özel anahtar + gerçek nitelikli sertifika bulundu (sertifika sahibinin
+  kimlik bilgileri gizlilik gereği burada paylaşılmamıştır).
 - Token'ın desteklediği mekanizmalar: `CKM_RSA_PKCS` (0x1), `CKM_ECDSA` (0x1041).
   Anahtar tipi **RSA-2048**.
 - `C_SignInit(CKM_RSA_PKCS) + C_Sign` → **GERÇEK İMZA ÜRETİLDİ, 256 byte
