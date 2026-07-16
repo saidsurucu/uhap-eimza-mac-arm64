@@ -26,7 +26,7 @@ cd "$(cd "$(dirname "$0")" && pwd)"
 [ -f Makefile ] && [ -d app ] || die "kur.sh'i repo kökünde çalıştırın."
 
 # 4) Build + kur
-info "İkon üretiliyor..."; ./scripts/make-icns.sh >/dev/null || warn "ikon üretilemedi (kozmetik)"
+if [ ! -f assets/UHAPImza.icns ]; then info "İkon üretiliyor..."; ./scripts/make-icns.sh >/dev/null || warn "ikon üretilemedi (kozmetik)"; fi
 info "Runtime ve build aracı hazırlanıyor..."; make jre
 info "Uygulama derleniyor..."; make app
 info "/Applications'a kuruluyor..."; make install

@@ -6,7 +6,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 JAR="$ROOT/build/app/Ard.ESignature.jar"
 JAVASSIST="$ROOT/.jre-cache/javassist.jar"
 # javac/java: sistem (17+) ya da indirilmiş Zulu 21
-JBIN="$(command -v javac >/dev/null 2>&1 && dirname "$(command -v javac)" || echo "$ROOT/.jre-cache/zulu21/bin")"
+JBIN="$(javac -version >/dev/null 2>&1 && dirname "$(command -v javac)" || echo "$ROOT/.jre-cache/zulu21/bin")"
 
 test -f "$JAR" || { echo "build/app/Ard.ESignature.jar yok — önce prep"; exit 1; }
 if [ ! -f "$JAVASSIST" ]; then

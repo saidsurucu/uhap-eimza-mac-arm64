@@ -10,7 +10,7 @@ ZULU21_URL := https://cdn.azul.com/zulu/bin/zulu21.50.19-ca-jdk21.0.11-macosx_aa
 
 RUNTIME := $(CACHE)/zulu11-runtime
 # Sistem jpackage (Java 17+) varsa onu kullan, yoksa indirilmiş Zulu 21'i
-JPACKAGE := $(shell command -v jpackage 2>/dev/null || echo $(CACHE)/zulu21/bin/jpackage)
+JPACKAGE := $(shell jpackage --version >/dev/null 2>&1 && command -v jpackage || echo $(CACHE)/zulu21/bin/jpackage)
 
 .PHONY: jre
 jre: $(RUNTIME)/bin/java $(JPACKAGE)
@@ -31,7 +31,7 @@ $(RUNTIME)/bin/java:
 	@echo ">> runtime: $(RUNTIME)"
 
 $(CACHE)/zulu21/bin/jpackage:
-	@if command -v jpackage >/dev/null 2>&1; then \
+	@if jpackage --version >/dev/null 2>&1; then \
 	   echo ">> sistem jpackage kullanılacak: $$(command -v jpackage)"; \
 	 else \
 	   echo ">> Zulu 21 (jpackage) indiriliyor..."; \

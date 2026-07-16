@@ -15,6 +15,7 @@ TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 ( cd "$TMP" && unzip -oq "$DST/Ard.ESignature.jar" log4j.properties )
 # File= satırını değiştir (sed macOS: -i '')
 sed -i '' "s#^log4j.appender.fileLogger.File=.*#log4j.appender.fileLogger.File=${LOGPATH}#" "$TMP/log4j.properties"
+grep -q '^log4j.appender.fileLogger.File=${user.home}/Library/Logs/UHAPImza/log.out' "$TMP/log4j.properties" || { echo "HATA: log4j.properties yamasi eslesmedi" >&2; exit 1; }
 ( cd "$TMP" && zip -q "$DST/Ard.ESignature.jar" log4j.properties )
 
 # 2) sunpkcs11.jar'ı payload'dan çıkar (split-package belirsizliğini önle)

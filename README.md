@@ -22,7 +22,7 @@ cd uhap-eimza-mac
 
 `kur.sh`: gerekli Java runtime'ı indirir, `.app`'i derler,
 `/Applications/UHAPImza.app` olarak kurar ve AKİS sürücü durumunu bildirir.
-İnternet gerekir (Java runtime indirimi için).
+İnternet gerekir (Java runtime indirilmesi için).
 
 Manuel derleme: `make app` (sadece derle), `make dmg` (installer), `make run`
 (çalıştır), `make install` (/Applications'a kur).
