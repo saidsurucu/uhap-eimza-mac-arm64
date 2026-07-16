@@ -20,4 +20,9 @@ sed -i '' "s#^log4j.appender.fileLogger.File=.*#log4j.appender.fileLogger.File=$
 # 2) sunpkcs11.jar'ı payload'dan çıkar (split-package belirsizliğini önle)
 rm -f "$DST/sunpkcs11.jar"
 
+# 3) (opsiyonel) görünür imza yolundaki ölü Windows yazımını kaldır
+if [ "${PATCH_VISIBLE_SIG:-0}" = "1" ]; then
+  "$ROOT/scripts/patch-visible-signature.sh"
+fi
+
 echo "prep OK → $DST"
