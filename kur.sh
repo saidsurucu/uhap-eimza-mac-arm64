@@ -21,9 +21,26 @@ if ! xcode-select -p >/dev/null 2>&1; then
   die "CLT kurulumu bitince kur.sh'i tekrar çalıştırın."
 fi
 
-# 3) Repo kökü (kur.sh repo içinden çalıştırılır)
-cd "$(cd "$(dirname "$0")" && pwd)"
-[ -f Makefile ] && [ -d app ] || die "kur.sh'i repo kökünde çalıştırın."
+# 3) Repo kökünü bul; `curl | bash` ile çalıştırıldıysa repoyu klonla/güncelle
+REPO_URL="https://github.com/saidsurucu/uhap-eimza-mac-arm64.git"
+CLONE_DIR="$HOME/uhap-eimza-mac-arm64"
+if [ -f "./Makefile" ] && [ -d "./app" ]; then
+  REPO_ROOT="$(pwd)"                                   # repo kökünden çalıştırıldı
+elif [ -n "${BASH_SOURCE:-}" ] && [ -f "$(dirname "${BASH_SOURCE[0]}")/Makefile" ]; then
+  REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # bash /yol/kur.sh
+else
+  # curl | bash ile çalıştırıldı: depoyu klonla ya da güncelle
+  if [ -d "$CLONE_DIR/.git" ]; then
+    info "Mevcut kopya güncelleniyor: $CLONE_DIR"
+    git -C "$CLONE_DIR" pull --ff-only || warn "güncelleme atlandı (yerel değişiklik olabilir)"
+  else
+    info "Depo klonlanıyor: $CLONE_DIR"
+    git clone "$REPO_URL" "$CLONE_DIR"
+  fi
+  REPO_ROOT="$CLONE_DIR"
+fi
+cd "$REPO_ROOT"
+[ -f Makefile ] && [ -d app ] || die "Repo kökü bulunamadı: $REPO_ROOT"
 
 # 4) Build + kur
 if [ ! -f assets/UHAPImza.icns ]; then info "İkon üretiliyor..."; ./scripts/make-icns.sh >/dev/null || warn "ikon üretilemedi (kozmetik)"; fi

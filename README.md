@@ -1,84 +1,89 @@
-# UHAP İmzalama — macOS (Apple Silicon) Port
+# UHAP İmzalama — macOS (Apple Silicon) Portu
 
 UHAP e-imza aracının (ARDGRUP/ImzaTek tabanlı) Apple Silicon Mac'ler için
-topluluk portu. **Resmi değildir**; UHAP veya TÜBİTAK tarafından
-geliştirilmemiştir. Yalnızca paketleme betikleri içerir; Java uygulamasının
-kendisi değiştirilmez (yalnızca log yolu ve platform uyumu için küçük yamalar).
+**resmi olmayan, topluluk** portu. Gömülü arm64 Java 11 runtime ile native bir
+`.app` üretir; Rosetta veya ayrı Java kurulumu gerekmez.
 
-## Gereksinimler
+## Kurulum (tek komut)
 
-- Apple Silicon (arm64) Mac, macOS.
-- AKİS akıllı kart + kart okuyucu.
-- **AKİS macOS arm64 sürücüsü** (aşağıya bkz.).
-- İnternet bağlantısı (kurulum ve sertifika doğrulaması için).
-
-## Kurulum
+Terminale şunu yapıştırın:
 
 ```bash
-git clone <repo-url> uhap-eimza-mac
-cd uhap-eimza-mac
-./kur.sh
+curl -fsSL https://raw.githubusercontent.com/saidsurucu/uhap-eimza-mac-arm64/main/kur.sh | bash
 ```
 
-`kur.sh`: gerekli Java runtime'ı indirir, `.app`'i derler,
-`/Applications/UHAPImza.app` olarak kurar ve AKİS sürücü durumunu bildirir.
-İnternet gerekir (Java runtime indirilmesi için).
+Bu betik sırayla: Xcode Command Line Tools'u (gerekirse) kurar, depoyu
+`~/uhap-eimza-mac-arm64` altına klonlar, arm64 Java 11 runtime'ını indirir,
+`UHAPImza.app`'i derleyip imzalar ve `/Applications`'a kurar. İnternet gerekir.
 
-Manuel derleme: `make app` (sadece derle), `make dmg` (installer), `make run`
-(çalıştır), `make install` (/Applications'a kur).
+Kurulumdan sonra **UHAP İmzalama**'yı Launchpad/Uygulamalar'dan açın.
 
-## AKİS Sürücüsü (zorunlu)
+## Zorunlu: AKİS arm64 sürücüsü
 
-Uygulama akıllı kartı `libakisp11.dylib` üzerinden okur. TÜBİTAK BİLGEM'den
+Uygulama akıllı kartı `libakisp11.dylib` üzerinden okur ve **arm64** kod olarak
+çalışır; Intel sürücü arm64 sürece yüklenemez. TÜBİTAK BİLGEM'den
 **"Mac OS Arm (Apple Silicon)"** etiketli AKİS paketini kurun:
 
 - https://akiskart.bilgem.tubitak.gov.tr/tr/destek/
 
-Doğrulama:
+Doğrulama (arm64 içermeli):
 
 ```bash
-lipo -archs /usr/local/lib/libakisp11.dylib   # arm64 içermeli
+lipo -archs /usr/local/lib/libakisp11.dylib
 ```
 
-Intel-only sürücü kuruluysa "kütüphane yüklenemedi" hatası alırsınız; arm64
-paketini kurun.
+Intel-only sürücü kuruluysa kart okunamaz; arm64 paketini kurun.
 
 ## Kullanım
 
-1. "UHAP İmzalama"yı açın (arka planda `localhost:8080`'de sabit portlu bir
-   sunucu çalıştırır).
-2. Tarayıcıda https://uhap.com.tr açın ve imzalama akışını başlatın.
-3. Kart PIN'inizi girin.
+1. **UHAP İmzalama**'yı açın (arka planda `localhost:8080`'de çalışır).
+2. Tarayıcıda https://uhap.com.tr açıp imzalama akışını başlatın.
+3. Kart PIN'inizi girin; belge imzalanır.
 
-Loglar: `~/Library/Logs/UHAPImza/log.out`.
+Loglar: `~/Library/Logs/UHAPImza/log.out`
 
-## Sorun Giderme
+## Teknik özet
 
-- **Gatekeeper "açılamıyor":** Uygulama ad-hoc imzalıdır; ilk açılışta
-  uygulamaya sağ tık → Aç gerekebilir.
-- **8080 meşgul:** Portu kullanan başka uygulamayı kapatın (port sabittir,
-  değiştirilemez).
-- **Sertifika doğrulama hatası:** Uygulama doğrulama için
-  `depo.kamusm.gov.tr`'ye ağ üzerinden erişir; internet bağlantısı gerekir.
-- **Görünür (visible) imza sorunu:** Bu portta görünür imza yolu sınırlıdır
-  (bkz. Bilinen Sınırlar).
-- Sorunları incelemek için log dosyasına bakın:
-  `~/Library/Logs/UHAPImza/log.out`.
+- **jpackage + Zulu 11 arm64**: `.app` içine gömülü runtime (HiDPI/Retina).
+- **SunPKCS11 yolu**: uygulama TÜBİTAK ESYA (ma3api) ile SunPKCS11 üzerinden
+  imzalar; `jdk.crypto.cryptoki` modülü `--add-exports` ile açılır.
+- **Config çözümü**: `-Duser.dir=$APPDIR` ile config bundle içinden okunur.
+- **Yazılabilir log yolu** ve **ASCII executable adı** (`UHAPImza`) +
+  ad-hoc `codesign`.
 
-## Bilinen Sınırlar
+arm64 Zulu 11 + AKİS ile uçtan uca gerçek imza (RSA-2048) bu makinede
+doğrulanmıştır — bkz. `docs/VERIFICATION.md`.
 
-- Yalnızca arm64; Intel Mac'ler desteklenmez.
-- Notarize edilmemiştir (ad-hoc imza); Gatekeeper ilk açılışta uyarabilir.
-- Görünür PDF imzası (imza görselini PDF'e gömme) test edilmemiştir ve
-  çalışmayabilir; kaynak uygulamada bu yol Windows'a özgü bir dosya yolu
-  içerir. Test edilen yol görünmez (non-visible) imzalamadır.
-- Sertifika doğrulaması `depo.kamusm.gov.tr`'ye ağ erişimi gerektirir;
-  çevrimdışı çalışmaz.
-- Kart tipi: yalnızca AKİS test edilmiştir. Diğer token'lar denenmemiştir.
-- Yerel sunucu tüm ağ arayüzlerine bağlanır (`*:8080`); yerel ağdan (LAN)
-  erişilebilir durumdadır. Güvenilmeyen ağlarda bunu göz önünde bulundurun.
+## Elle derleme
 
-## Lisans / Sorumluluk
+```bash
+git clone https://github.com/saidsurucu/uhap-eimza-mac-arm64.git
+cd uhap-eimza-mac-arm64
+make app        # sadece .app'i derle (build/UHAPImza.app)
+make dmg        # sürükle-bırak disk imajı
+make run        # derleyip çalıştır
+make install    # /Applications'a kur
+```
 
-Paketleme betikleri topluluk katkısıdır. UHAP/ARDGRUP/TÜBİTAK marka ve
-yazılım hakları sahiplerine aittir.
+## Sorun giderme
+
+- **Gatekeeper "açılamıyor":** Uygulamaya sağ tık → **Aç** (ad-hoc imzalı).
+- **8080 meşgul:** Portu kullanan başka uygulamayı kapatın (port sabittir).
+- **"kütüphane yüklenemedi" / kart okunmuyor:** AKİS **arm64** sürücüsünü kurun.
+- **Sertifika doğrulama hatası:** Uygulama `depo.kamusm.gov.tr`'ye erişir;
+  internet gerekir.
+
+## Bilinen sınırlar
+
+- Yalnızca **arm64** (Apple Silicon); Intel desteklenmez.
+- **Notarize edilmemiştir** (ad-hoc imza; ilk açılışta sağ tık → Aç).
+- Görünür (visible) PDF imzası test edilmemiştir; kaynak uygulamada bu yol
+  Windows'a özgü bir dosya yolu içerir (görünmez imza test edilen yoldur).
+- Kart tipi: **AKİS**. Diğer token'lar test edilmemiştir.
+- Yerel sunucu tüm arayüzlerde (`*:8080`) dinler; yerel ağdan erişilebilir.
+
+## Sorumluluk reddi
+
+Bu depo **resmi değildir**; UHAP, ARDGRUP veya TÜBİTAK tarafından geliştirilmemiş
+ya da onaylanmamıştır. Yalnızca paketleme ve derleme betikleri sağlar. UHAP /
+ARDGRUP / TÜBİTAK marka ve yazılım hakları sahiplerine aittir.
