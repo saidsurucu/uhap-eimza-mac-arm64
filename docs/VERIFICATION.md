@@ -55,6 +55,29 @@ API'si** ile:
 > Güvenlik notu: Yanlış PIN AKİS kartını kilitleyebileceği için yalnızca doğru
 > PIN ile TEK login denendi (başarılı; hatalı deneme yok). PIN diske yazılmadı.
 
+## Uçtan uca imza testi (2026-07-16) — iki gerçek hata bulundu ve düzeltildi
+Gerçek bir belgeyle UHAP portalı üzerinden PAdES imzası denendiğinde iki hata
+çıktı; ikisi de kalıcı olarak düzeltildi ve sonra imza **başarıyla** tamamlandı.
+
+**Hata 1 — Sürücü yanlış konumdan/mimariden yükleniyor.** Uygulama (ESYA
+`OpsUtil`) sürücüyü `java.library.path` üzerinden, yani önce
+`~/Library/Java/Extensions/libakisp11.dylib`'ten yükler. AKİS'in Intel kurulumu
+oraya **yalnızca x86_64** dylib koyduğu için arm64 JRE yükleyemedi
+(`incompatible architecture (have 'x86_64', need 'arm64')`).
+→ **Kalıcı düzeltme:** `kur.sh`, `~/Library/Java/Extensions/libakisp11.dylib`
+arm64 değilse arm64 içeren bir kaynağı (örn. `/usr/local/lib`) oraya kopyalar
+(eskisini `.x86_64.bak` olarak yedekler).
+
+**Hata 2 — `certval-policy.xml` bundle'da yanlış klasörde aranıyor.**
+`esya-signature-config.xml` içindeki `<certificate-validation-policy-file>
+certval-policy.xml</...>` göreli referansı, bağlam kök URI'sine
+(`user.dir = $APPDIR = Contents/app`) göre çözülüyor; dosya ise `Contents/app/
+config/` altındaydı → `FileNotFoundException: .../Contents/app/certval-policy.xml`.
+→ **Kalıcı düzeltme:** `scripts/prep-payload.sh` artık config XML'lerini
+`config/`'e ek olarak `$APPDIR` köküne de kopyalıyor.
+
+Her iki düzeltme uygulanınca (arm64 sürücü + kök config) imza uçtan uca çalıştı.
+
 ## Kalan: uygulama-portal entegrasyonu (kullanıcı kabul testi)
 Kriptografik imza yolu kanıtlandığından geriye yalnızca uygulamanın kendi
 tarayıcı↔localhost↔ESYA akışı kalıyor:

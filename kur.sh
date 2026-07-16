@@ -48,15 +48,33 @@ info "Runtime ve build aracı hazırlanıyor..."; make jre
 info "Uygulama derleniyor..."; make app
 info "/Applications'a kuruluyor..."; make install
 
-# 5) AKİS sürücü kontrolü + yönlendirme
-DYLIB="/usr/local/lib/libakisp11.dylib"
-if [ -f "$DYLIB" ] && lipo -archs "$DYLIB" 2>/dev/null | grep -q arm64; then
-  info "AKİS sürücüsü mevcut (arm64): $DYLIB"
+# 5) AKİS sürücüsü: ~/Library/Java/Extensions'ta arm64 libakisp11.dylib garanti et
+# Uygulama (ESYA/OpsUtil) sürücüyü java.library.path'ten, yani önce
+# ~/Library/Java/Extensions/ altından yükler. AKİS'in Intel kurulumu oraya
+# x86_64 dylib koyarsa arm64 JRE yükleyemez ("incompatible architecture").
+EXTDIR="$HOME/Library/Java/Extensions"
+TARGET="$EXTDIR/libakisp11.dylib"
+has_arm64(){ [ -f "$1" ] && lipo -archs "$1" 2>/dev/null | grep -qw arm64; }
+
+if has_arm64 "$TARGET"; then
+  info "AKİS sürücüsü hazır (arm64): $TARGET"
 else
-  warn "AKİS arm64 sürücüsü bulunamadı."
-  warn "TÜBİTAK BİLGEM'den 'Mac OS Arm (Apple Silicon)' AKİS paketini kurun:"
-  warn "  https://akiskart.bilgem.tubitak.gov.tr/tr/destek/"
-  warn "Kurulum sonrası doğrulama: lipo -archs $DYLIB  → arm64 içermeli"
+  # arm64 içeren bir kaynak bul
+  SRC=""
+  for cand in /usr/local/lib/libakisp11.dylib /Library/Java/Extensions/libakisp11.dylib; do
+    if has_arm64 "$cand"; then SRC="$cand"; break; fi
+  done
+  if [ -n "$SRC" ]; then
+    mkdir -p "$EXTDIR"
+    if [ -f "$TARGET" ]; then cp "$TARGET" "$TARGET.x86_64.bak"; warn "eski (arm64 olmayan) sürücü yedeklendi: $TARGET.x86_64.bak"; fi
+    cp "$SRC" "$TARGET"
+    info "arm64 AKİS sürücüsü kuruldu: $TARGET (kaynak: $SRC)"
+  else
+    warn "arm64 AKİS sürücüsü bulunamadı."
+    warn "TÜBİTAK BİLGEM'den 'Mac OS Arm (Apple Silicon)' AKİS paketini kurun:"
+    warn "  https://akiskart.bilgem.tubitak.gov.tr/tr/destek/"
+    warn "Kurulum sonrası kur.sh'i tekrar çalıştırın (sürücü otomatik yerleştirilir)."
+  fi
 fi
 
 info "Bitti. 'UHAP İmzalama' Launchpad/Uygulamalar'dan açılabilir."

@@ -32,7 +32,11 @@ Doğrulama (arm64 içermeli):
 lipo -archs /usr/local/lib/libakisp11.dylib
 ```
 
-Intel-only sürücü kuruluysa kart okunamaz; arm64 paketini kurun.
+`kur.sh`, uygulamanın sürücüyü aradığı yere (`~/Library/Java/Extensions/`)
+arm64 `libakisp11.dylib`'i otomatik yerleştirir; oradaki eski Intel sürücüyü
+`.x86_64.bak` olarak yedekler. AKİS arm64 paketini kurduktan sonra `kur.sh`'i
+(tekrar) çalıştırmanız yeterlidir. Intel-only sürücü kuruluysa kart okunamaz;
+arm64 paketini kurun.
 
 ## Kullanım
 
