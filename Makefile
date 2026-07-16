@@ -71,6 +71,7 @@ run: app
 install: app
 	@rm -rf "/Applications/$(APPNAME).app"
 	@cp -R $(BUILD)/$(APPNAME).app /Applications/
+	@xattr -dr com.apple.quarantine "/Applications/$(APPNAME).app" 2>/dev/null || true
 	@echo ">> kuruldu: /Applications/$(APPNAME).app"
 
 clean:
