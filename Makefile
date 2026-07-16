@@ -53,3 +53,26 @@ prep:
 
 app: jre prep
 	@RUNTIME="$(RUNTIME)" JPACKAGE="$(JPACKAGE)" ./scripts/build-app.sh
+
+.PHONY: dmg run install clean
+dmg: app
+	@rm -f $(BUILD)/$(APPNAME).dmg
+	@rm -rf $(BUILD)/dmgroot && mkdir -p $(BUILD)/dmgroot
+	@cp -R $(BUILD)/$(APPNAME).app $(BUILD)/dmgroot/
+	@ln -s /Applications $(BUILD)/dmgroot/Applications
+	@hdiutil create -volname "$(APPNAME)" -srcfolder $(BUILD)/dmgroot \
+	   -ov -format UDZO $(BUILD)/$(APPNAME).dmg
+	@rm -rf $(BUILD)/dmgroot
+	@echo ">> dmg: $(BUILD)/$(APPNAME).dmg"
+
+run: app
+	@open $(BUILD)/$(APPNAME).app
+
+install: app
+	@rm -rf "/Applications/$(APPNAME).app"
+	@cp -R $(BUILD)/$(APPNAME).app /Applications/
+	@echo ">> kuruldu: /Applications/$(APPNAME).app"
+
+clean:
+	@rm -rf $(BUILD)
+	@echo ">> temizlendi (build/). .jre-cache korunur."
