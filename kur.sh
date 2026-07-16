@@ -12,6 +12,8 @@ die(){ echo "${RED}HATA:${RST} $*" >&2; exit 1; }
 [ "$(uname -s)" = "Darwin" ] || die "Yalnızca macOS."
 [ "$(uname -m)" = "arm64" ] || die "Yalnızca Apple Silicon (arm64)."
 
+info "Bu kurucu resmi değildir; UHAP İmzalama'nın topluluk portudur."
+
 # 2) Xcode CLT (make, git, curl için)
 if ! xcode-select -p >/dev/null 2>&1; then
   warn "Xcode Command Line Tools kuruluyor — pencereyi onaylayın..."
