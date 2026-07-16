@@ -46,3 +46,10 @@ $(CACHE)/zulu21/bin/jpackage:
 	   else mv $(CACHE)/_z21 $(CACHE)/zulu21; fi; \
 	   rm -rf $(CACHE)/_z21 $(CACHE)/zulu21.tar.gz; \
 	 fi
+
+.PHONY: prep app
+prep:
+	@./scripts/prep-payload.sh
+
+app: jre prep
+	@RUNTIME="$(RUNTIME)" JPACKAGE="$(JPACKAGE)" ./scripts/build-app.sh
