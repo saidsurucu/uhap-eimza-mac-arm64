@@ -1,4 +1,7 @@
 build/
 .jre-cache/
 *.dmg
+*.msi
 .DS_Store
+_tmp/
+.superpowers/
